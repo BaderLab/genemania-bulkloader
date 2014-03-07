@@ -1,7 +1,9 @@
 #!/bin/bash
 
-GENEMANIA_JAR=$1
+WORKING_DIR=$1
+GENEMANIA_JAR=$2
 
+cd ${WORKING_DIR}
 
 mkdir temp
 pushd temp
@@ -12,8 +14,9 @@ do
 done
 
 cp ../Networks/* ./
-cp ../batch_snp.txt ../ids.txt  .
-python ../process_networks.py batch_snp.txt
+cp ../batch.txt ../ids.txt  .
+
+python ../process_networks.py batch.txt
 
 popd
 
