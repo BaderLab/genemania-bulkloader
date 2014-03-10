@@ -1,9 +1,6 @@
 #!/bin/bash
 
-WORKING_DIR=$1
-GENEMANIA_JAR=$2
-
-cd ${WORKING_DIR}
+GENEMANIA_JAR=$1
 
 mkdir temp
 pushd temp
@@ -25,7 +22,7 @@ for PROFILE in temp/profiles/*.profile
 do
     NETWORK_NAME="$(basename ${PROFILE} .profile)"
     ORGANISM="$(echo ${NETWORK_NAME} | cut -d . -f 1)"
-    java -Xmx10G -cp ${GENEMANIA_JAR} org.genemania.engine.core.evaluation.ProfileToNetworkDriver -in "${PROFILE}" -out "temp/INTERACTIONS/${NETWORK_NAME}" -proftype bin -cor PEARSON_BIN_LOG_NO_NORM -noHeader -syn temp/${ORGANISM}.synonyms -keepAllTies -limitTies -threshold off
+    java -Xmx10G -cp ${GENEMANIA_JAR} org.genemania.engine.core.evaluation.ProfileToNetworkDriver -in "${PROFILE}" -out "temp/INTERACTIONS/${NETWORK_NAME}.txt" -proftype bin -cor PEARSON_BIN_LOG_NO_NORM -noHeader -syn temp/${ORGANISM}.synonyms -keepAllTies -limitTies -threshold off
 done
 
 mkdir dataset
