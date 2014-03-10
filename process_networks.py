@@ -48,11 +48,23 @@ def handle_ids(naming_source_id, organism_id, id_file_name):
         id_map[symbol] = node_id
     return id_map
 
+def handle_synonyms(organism_id, id_map):
+    ids = set(id_map.values())
+    synonym_file_name = '%d.synonyms' % organism_id
+    synonym_file = open(synonym_file_name, 'w')
+    try:
+        for id in ids:
+            print >> synonym_file, '%d\t%d' % (id, id)
+    finally:
+        synonym_file.close()
+    
 def handle_organism(data):
     global organism_id
     global naming_source_id
     
     ids = handle_ids(naming_source_id, organism_id, data[1])
+    handle_synonyms(organism_id, ids)
+    
     organism_ids[organism_id] = ids
     organism_data[organism_id] = data
     organisms[data[2]] = organism_id
@@ -76,6 +88,9 @@ def handle_group(data):
 def count_interactions(organism_id, file_name):
     symbols = organism_ids[organism_id]
     interactions = 0
+    if file_name.endswith('.profile'):
+        return 0
+    
     for line in open(file_name, 'rU'):
         data = line.strip().split('\t')
         if data[0] in symbols and data[1] in symbols:
@@ -84,12 +99,21 @@ def count_interactions(organism_id, file_name):
 
 def write_network(organism_id, file_name, network_id):
     symbols = organism_ids[organism_id]
-    output_file_name = '%d.%d.txt' % (organism_id, network_id)
-    output_file = open(join('INTERACTIONS', output_file_name), 'w')
+    
+    id_indexes = [0, 1]
+    if file_name.endswith('.profile'):
+        id_indexes = [0]
+        output_file_name = '%d.%d.profile' % (organism_id, network_id)
+        output_path = 'profiles'
+    else:
+        output_file_name = '%d.%d.txt' % (organism_id, network_id)
+        output_path = 'INTERACTIONS'
+        
+    output_file = open(join(output_path, output_file_name), 'w')
     
     for line in open(file_name, 'rU'):
         data = line.strip().split('\t')
-        for i in [0, 1]:
+        for i in id_indexes:
             data[i] = str(symbols[data[i]])
         print >> output_file, '\t'.join(data)        
     
@@ -142,6 +166,7 @@ for line in open(batch_file_name, 'rU'):
         handle_group(data)
     if data[0] == 'network':
         handle_network(data)
-    write_naming_sources()
-    write_configuration('db.cfg', organism_data)
+
+write_naming_sources()
+write_configuration('db.cfg', organism_data)
 
